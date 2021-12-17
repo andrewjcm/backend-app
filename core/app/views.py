@@ -1,13 +1,24 @@
 from django.contrib.auth.models import User, Group
 from rest_framework.response import Response
-
-from .models import HealthProfile, SurvivalPrediction
 from rest_framework import viewsets, status
 from rest_framework import permissions
 from .serializers import (
-    UserSerializer, GroupSerializer, HealthProfileSerializer, SurvivalPredictionSerializer
+    UserSerializer, GroupSerializer,
+    HealthProfileSerializer, SurvivalPredictionSerializer,
+    CovidDataSerializer
 )
+from .models import (
+    HealthProfile, SurvivalPrediction,
+    CovidDeathAgeCount, ComorbidityCounts,
+    SurvivalRate
+)
+
 from machine_learning.logistic_reg import PredictSurvival
+from data_visualization.data_mod import process_data
+
+from collections import namedtuple
+
+CovidData = namedtuple('CovidData', ('death_age', 'comorbidity', 'survival_rate'))
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -26,6 +37,38 @@ class GroupViewSet(viewsets.ModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+class CovidDataViewSet(viewsets.ViewSet):
+    """
+    API endpoint to view the covid data.
+    """
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def list(self, request):
+        queryset = SurvivalRate.objects.all()
+        if not queryset:
+            processed_data = process_data()
+            survival_rate = processed_data['survival_rate']
+            death_age = processed_data['died_covid_age']
+            comorbidity = processed_data['comorbidity']
+
+            death_age_objs = [CovidDeathAgeCount(age=key, count=death_age[key]) for key in death_age]
+            CovidDeathAgeCount.objects.bulk_create(death_age_objs)
+
+            sr = SurvivalRate(rate=survival_rate)
+            sr.save()
+
+            com = ComorbidityCounts(**comorbidity)
+            com.save()
+
+        covid_data = CovidData(
+            death_age=CovidDeathAgeCount.objects.all(),
+            comorbidity=ComorbidityCounts.objects.all(),
+            survival_rate=SurvivalRate.objects.all()
+        )
+        serializer = CovidDataSerializer(covid_data)
+        return Response(serializer.data)
 
 
 def create_prediction():

@@ -1,6 +1,29 @@
 from django.db import models
 
 
+class CovidDeathAgeCount(models.Model):
+    age = models.IntegerField(unique=True)
+    count = models.IntegerField()
+
+
+class ComorbidityCounts(models.Model):
+    pneumonia = models.IntegerField()
+    diabetes = models.IntegerField()
+    copd = models.IntegerField()
+    asthma = models.IntegerField()
+    inmsupr = models.IntegerField()
+    hypertension = models.IntegerField()
+    other_disease = models.IntegerField()
+    cardiovascular = models.IntegerField()
+    obesity = models.IntegerField()
+    renal_chronic = models.IntegerField()
+    tobacco = models.IntegerField()
+
+
+class SurvivalRate(models.Model):
+    rate = models.FloatField()
+
+
 class HealthProfile(models.Model):
     sex = models.IntegerField()
     patient_type = models.IntegerField(default=0)

@@ -4,32 +4,21 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
+from data_visualization.data_mod import get_data, rename_columns, adjust_values
 
 
 def cleaned_data():
-    df = pd.read_csv("covid.csv")
+    df = get_data()
 
     # rename columns
-    df.rename(columns={
-        "date_died": "died",
-        "intubed": "ventilator",
-        "contact_other_covid": "covid_contact",
-        "covid_res": "covid_positive"
-    }, inplace=True)
+    df = rename_columns(df)
     df = df[['sex', 'patient_type', 'died', 'age',
              'ventilator', 'pneumonia', 'pregnancy', 'diabetes', 'copd',
              'asthma', 'inmsupr', 'hypertension', 'other_disease', 'cardiovascular',
              'obesity', 'renal_chronic', 'tobacco', 'covid_contact',
              'covid_positive', 'icu']]
 
-    # Convert death dates to died
-    df['died'] = [0 if date == "9999-99-99" else 1 for date in df['died']]
-
-    # Replace all unknowns to NaN
-    df = df.replace([97, 98, 99, 3], np.nan)
-
-    # Replace all 2 to 0 (Female = 1, Male = 0, Outpatient = 1, Inpatient =0, Yes = 1, No = 0)
-    df = df.replace(2, 0)
+    df = adjust_values(df)
 
     # Drop non-confirmed cases
     df = df[df['covid_positive'] == 1]

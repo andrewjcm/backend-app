@@ -1,13 +1,11 @@
 import pandas as pd
-import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
 from data_visualization.data_mod import get_data, rename_columns, adjust_values
 
 
 def cleaned_data():
+    """  Get and clean data. """
     df = get_data()
 
     # rename columns
@@ -32,6 +30,9 @@ def cleaned_data():
 
 
 class PredictSurvival:
+    """
+    Logistic regression to predict survival of covid positive patient.
+    """
     def __init__(self, features):
         self.features = features
         self.data = cleaned_data()

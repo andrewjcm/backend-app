@@ -2,11 +2,17 @@ from django.db import models
 
 
 class CovidDeathAgeCount(models.Model):
+    """
+    Total covid deaths by age data model.
+    """
     age = models.IntegerField(unique=True)
     count = models.IntegerField()
 
 
 class ComorbidityCounts(models.Model):
+    """
+    Totals of each underlying risk factor.
+    """
     pneumonia = models.IntegerField()
     diabetes = models.IntegerField()
     copd = models.IntegerField()
@@ -21,10 +27,14 @@ class ComorbidityCounts(models.Model):
 
 
 class SurvivalRate(models.Model):
+    """ Survival rate based on provided data. """
     rate = models.FloatField()
 
 
 class HealthProfile(models.Model):
+    """
+    Health profile to make the survival prediction about.
+    """
     sex = models.IntegerField()
     patient_type = models.IntegerField(default=0)
     age = models.IntegerField()
@@ -42,6 +52,7 @@ class HealthProfile(models.Model):
     covid_positive = models.IntegerField(default=1)
 
     def custom_dict(self):
+        """ Return dictionary of the modeled data. """
         new_dict = self.__dict__
         del new_dict['_state']
         del new_dict['id']
@@ -50,5 +61,6 @@ class HealthProfile(models.Model):
 
 
 class SurvivalPrediction(models.Model):
+    """ Model of the prediction. """
     died = models.FloatField()
     health_profile_id = models.OneToOneField(HealthProfile, on_delete=models.CASCADE, primary_key=True)

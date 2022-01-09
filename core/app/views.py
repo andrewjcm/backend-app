@@ -18,6 +18,7 @@ from data_visualization.data_mod import process_data
 
 from collections import namedtuple
 
+# Named tuple to combine multiple models to a single viewset
 CovidData = namedtuple('CovidData', ('death_age', 'comorbidity', 'survival_rate'))
 
 
@@ -42,6 +43,9 @@ class GroupViewSet(viewsets.ModelViewSet):
 class CovidDataViewSet(viewsets.ViewSet):
     """
     API endpoint to view the covid data.
+
+    If data not already loaded in the database, data will be pulled
+    from the csv data source and loaded into the database.
     """
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -61,7 +65,6 @@ class CovidDataViewSet(viewsets.ViewSet):
 
             com = ComorbidityCounts(**comorbidity)
             com.save()
-
         covid_data = CovidData(
             death_age=CovidDeathAgeCount.objects.all(),
             comorbidity=ComorbidityCounts.objects.all(),
@@ -72,6 +75,7 @@ class CovidDataViewSet(viewsets.ViewSet):
 
 
 def create_prediction():
+    """ Run machine learning prediction. """
     prof = HealthProfile.objects.all().last()
     prof_id = prof.id
     prof_dict = prof.custom_dict()
@@ -82,6 +86,7 @@ def create_prediction():
 
 
 def append_prediction_to_response(data):
+    """ Append prediction to API success response. """
     prediction = create_prediction()
     data['died'] = prediction
     return data

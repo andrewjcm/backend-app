@@ -18,6 +18,7 @@ from django.urls import path, include
 from rest_framework import routers
 from app import views
 from rest_framework_simplejwt import views as jwt_views
+from django.contrib import admin
 
 router = routers.DefaultRouter()
 router.register(r'api/users', views.UserViewSet)
@@ -32,4 +33,5 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
+    path('admin', admin.site.urls),
 ]
